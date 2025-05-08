@@ -1,0 +1,36 @@
+name: "letsencrypt"
+services:
+  lego:
+    image: "11notes/lego:1.0.0"
+    dns:
+      - "8.8.8.8"
+      - "9.9.9.9"
+    read_only: true
+    environment:
+      TZ: "Europe/Zurich"
+      LEGO_CONFIG: |-
+        domains:
+          - name: "domain.com"
+            fqdns:
+              - "*.domain.com"
+              - "domain.com"
+            commands:
+              - "--dns"
+              - "rfc2136"          
+        global:
+          LEGO_EMAIL: "info@domain.com"
+          RFC2136_NAMESERVER: "ns.domain.com"
+          RFC2136_TSIG_ALGORITHM: "hmac-sha512"
+          RFC2136_TSIG_KEY: "lego"
+          RFC2136_TSIG_SECRET: ${RFC2136_TSIG_SECRET}
+    volumes:
+      - "etc:/lego/etc" 
+      - "var:/lego/var"
+    networks:
+      frontend:
+    restart: "always"
+volumes:
+  etc:
+  var:
+networks:
+  frontend:
