@@ -8,7 +8,7 @@ import (
 	"os/signal"
 	"syscall"
 	"fmt"
-	"github.com/jasonlvhit/gocron"
+	"github.com/go-co-op/gocron/v2"
 	"strings"
 	"io"
 	"bufio"
@@ -297,6 +297,14 @@ func main(){
 
 	// set schedule
 	daily()
-	gocron.Every(1).Day().At("09:00").Do(daily)
-	<- gocron.Start()
+	scheduler, err := gocron.NewScheduler()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "cron error: %s\n", err)
+	}
+	_, err = scheduler.NewJob(gocron.CronJob("0 9 * * *", false), gocron.NewTask(daily))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "cron error: %s\n", err)
+	}
+	scheduler.Start()
+	select {}
 }
