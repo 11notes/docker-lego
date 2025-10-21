@@ -16,7 +16,7 @@ services:
               - "domain.com"
             commands:
               - "--dns"
-              - "rfc2136" 
+              - "rfc2136"
 
           - name: "porkbun.com"
             fqdns:
@@ -24,7 +24,7 @@ services:
               - "porkbun.com"
             commands:
               - "--dns"
-              - "porkbun"    
+              - "porkbun"
         global:
           LEGO_EMAIL: "info@domain.com"
           RFC2136_NAMESERVER: "ns.domain.com"
@@ -34,13 +34,15 @@ services:
           PORKBUN_SECRET_API_KEY: ${PORKBUN_SECRET_API_KEY}
           PORKBUN_API_KEY: ${PORKBUN_API_KEY}
     volumes:
-      - "etc:/lego/etc" 
-      - "var:/lego/var"
+      - "lego.etc:/lego/etc" 
+      - "lego.var:/lego/var"
     networks:
       frontend:
     restart: "always"
+
 volumes:
-  etc:
-  var:
+  lego.etc:
+  lego.var:
+
 networks:
   frontend:
