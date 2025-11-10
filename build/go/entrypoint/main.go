@@ -31,7 +31,6 @@ var(
 			BaseEtc:fmt.Sprintf("%s%s", os.Getenv("APP_ROOT"), "/etc"),
 			Lego:"/usr/local/bin/lego",
 		},
-		MaxNameLength:0,
 	}
 )
 
@@ -44,7 +43,6 @@ type Paths struct {
 
 type Etc struct {
 	Paths Paths
-	MaxNameLength int
 	Email string
 }
 
@@ -69,14 +67,6 @@ type ACMEAccount struct {
 	} `json:"registration"`
 }
 
-func log(caller string, msg string){
-	var spaces string
-	for i := 1; i <= etc.MaxNameLength - len(caller); i++ {
-		spaces += " "
-	}
-	fmt.Fprintf(os.Stdout, "%s%s | %s\n", caller, spaces, msg)
-}
-
 func config() (*Config, error){
 	cfg := &Config{}
 	file, err := ioutil.ReadFile(os.Getenv("LEGO_CONFIG"))
@@ -87,11 +77,6 @@ func config() (*Config, error){
 	}else{
 		if err := yaml.Unmarshal(file, cfg); err != nil {
 			return cfg, err
-		}
-	}
-	for _, domain := range cfg.Domains {
-		if len(domain.Name) > etc.MaxNameLength{
-			etc.MaxNameLength = len(domain.Name)
 		}
 	}
 	return cfg, nil
@@ -164,16 +149,16 @@ func run(name string, fqdns []string, commands []string, environment []string) (
 	accountFile := fmt.Sprintf("%s/acme-v02.api.letsencrypt.org/%s/account.json", etc.Paths.BaseEtc, etc.Email)
 	if _, err := os.Stat(accountFile); os.IsNotExist(err){
 		args = append(args, "run")
-		log(name, "create certificate")
+		Eleven.Log("INF", "create certificate for %s", name)
 	}else{
 		if accountValid(name, accountFile) {
 			// check if a certificate already exists
 			if _, err := os.Stat(fmt.Sprintf("%s/%s/certificates/%s.crt", etc.Paths.BaseVar, name, strings.Replace(fqdns[0], "*", "_", -1))); os.IsNotExist(err) {
 				args = append(args, "run")
-				log(name, "create certificate")
+				Eleven.Log("INF", "create certificate for %s", name)
 			}else{
 				args = append(args, "renew")
-				log(name, "renew certificate")
+				Eleven.Log("INF", "renew certificate for %s", name)
 			}
 		}else{
 			return false
@@ -194,23 +179,23 @@ func run(name string, fqdns []string, commands []string, environment []string) (
 		for stdoutScanner.Scan() {
 			line := stdoutScanner.Text()
 			output = append(output, line)
-			log(name, line)
+			Eleven.Log("INF", "%s: %s", name, line)
 		}
 	}()
 
 	err = cmd.Start()
 	if err != nil {
-		log(name, fmt.Sprintf("lego execution error: %s\n", err))
+		Eleven.Log("INF", "lego execution error: %s", err)
 		return false
 	}
 
 	err = cmd.Wait()
 	if err != nil {
-		log(name, fmt.Sprintf("lego execution error: %s\n", err))
+		Eleven.Log("INF", "lego execution error: %s", err)
 		return false
 	}
 
-	log(name, "certificate successfully created")
+	Eleven.Log("INF", "certificate for %s successfully created", name)
 
 	return true
 }
