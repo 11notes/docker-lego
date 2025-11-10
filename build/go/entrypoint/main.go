@@ -18,6 +18,21 @@ import (
 	"regexp"
 	"encoding/pem"
 	"time"
+
+	"github.com/11notes/go"
+)
+
+var(
+	Eleven eleven.New = eleven.New{}
+	etc = Etc{
+		Paths:Paths{
+			Base:os.Getenv("APP_ROOT"),
+			BaseVar:fmt.Sprintf("%s%s", os.Getenv("APP_ROOT"), "/var"),
+			BaseEtc:fmt.Sprintf("%s%s", os.Getenv("APP_ROOT"), "/etc"),
+			Lego:"/usr/local/bin/lego",
+		},
+		MaxNameLength:0,
+	}
 )
 
 type Paths struct {
@@ -31,16 +46,6 @@ type Etc struct {
 	Paths Paths
 	MaxNameLength int
 	Email string
-}
-
-var etc = Etc{
-	Paths:Paths{
-		Base:os.Getenv("APP_ROOT"),
-		BaseVar:fmt.Sprintf("%s%s", os.Getenv("APP_ROOT"), "/var"),
-		BaseEtc:fmt.Sprintf("%s%s", os.Getenv("APP_ROOT"), "/etc"),
-		Lego:"/usr/local/bin/lego",
-	},
-	MaxNameLength:0,
 }
 
 type Config struct {
@@ -117,22 +122,22 @@ func path(name string) (error){
 func accountValid(name string, file string) (bool){
 	accountJson, err := os.Open(file)
 	if err != nil{
-		log(name, fmt.Sprintf("lego account error: %s", err))
+		Eleven.Log("ERR", "lego account error for %s: %s", name, err)
 		return false
 	}
 	byteValue, err := ioutil.ReadAll(accountJson)
 	if err != nil{
-		log(name, fmt.Sprintf("lego account error: %s", err))
+		Eleven.Log("ERR", "lego account error for %s: %s", name, err)
 		return false
 	}
 	var account ACMEAccount
 	err = json.Unmarshal(byteValue, &account);
 	if err != nil{
-		log(name, fmt.Sprintf("lego account error: %s", err))
+		Eleven.Log("ERR", "lego account error for %s: %s", name, err)
 		return false
 	}
 	if account.Registration.Body.Status != "valid"{
-		log(name, fmt.Sprintf("lego account error: Account status is not valid, it is %s", account.Registration.Body.Status))
+		Eleven.Log("ERR", "lego account error for %s: Account status is not valid, it is %s", name, account.Registration.Body.Status)
 		return false
 	}
 	return true
@@ -227,19 +232,19 @@ func cleanup(){
 		return nil
 	})
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "filepath.Walk error: %s\n", err)
+		Eleven.Log("ERR", "filepath.Walk error: %s", err)
 	}
 }
 
 func checkCertificateExpired(crt string) (bool){
 	file, err := ioutil.ReadFile(crt)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "could not open certificate %s: %s\n", crt, err)
+		Eleven.Log("ERR", "could not open certificate %s: %s", crt, err)
 	}
 	b, _ := pem.Decode(file)
 	certificates, err := x509.ParseCertificates(b.Bytes)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "could not parse certificate %s: %s\n", crt, err)
+		Eleven.Log("ERR", "could not parse certificate %s: %s", crt, err)
 	}
 	for _, certificate := range certificates {
 		if time.Now().Unix() > certificate.NotAfter.Unix(){
@@ -250,14 +255,14 @@ func checkCertificateExpired(crt string) (bool){
 }
 
 func daily(){
-	fmt.Println("starting daily job")
+	Eleven.Log("INF", "starting daily job")
 
 	// check if config is valid
 	cfg, err := config()
 	if err != nil{
-		fmt.Fprintf(os.Stderr, "config error: %s\n", err)
+		Eleven.Log("ERR", "config error: %s", err)
 	}else{
-		fmt.Printf("found %b entires in config file\n", len(cfg.Domains))
+		Eleven.Log("INF", "found %b entires in config file", len(cfg.Domains))
 		for _, certificate := range cfg.Domains {
 			// create env for lego to use
 			var env []string
@@ -299,11 +304,11 @@ func main(){
 	daily()
 	scheduler, err := gocron.NewScheduler()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "cron error: %s\n", err)
+		Eleven.LogFatal("cron error: %s", err)
 	}
 	_, err = scheduler.NewJob(gocron.CronJob("0 9 * * *", false), gocron.NewTask(daily))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "cron error: %s\n", err)
+		Eleven.LogFatal("cron error: %s", err)
 	}
 	scheduler.Start()
 	select {}

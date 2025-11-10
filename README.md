@@ -32,7 +32,7 @@ services:
               - "domain.com"
             commands:
               - "--dns"
-              - "rfc2136" 
+              - "rfc2136"
 
           - name: "porkbun.com"
             fqdns:
@@ -40,7 +40,7 @@ services:
               - "porkbun.com"
             commands:
               - "--dns"
-              - "porkbun"    
+              - "porkbun"
         global:
           LEGO_EMAIL: "info@domain.com"
           RFC2136_NAMESERVER: "ns.domain.com"

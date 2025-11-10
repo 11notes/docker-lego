@@ -2,9 +2,8 @@
   "image": "11notes/lego",
   "name": "lego",
   "root": "/lego",
-  "arch": "linux/amd64,linux/arm64,linux/arm/v7",
   "semver": {
-    "version": "1.0.0"
+    "version": "4.28.1"
   },
   "readme": {
     "description": "Run lego on a schedule rootless, distroless and secure by default!",

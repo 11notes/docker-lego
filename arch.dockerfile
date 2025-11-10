@@ -1,51 +1,29 @@
 # ╔═════════════════════════════════════════════════════╗
 # ║                       SETUP                         ║
 # ╚═════════════════════════════════════════════════════╝
-
-  # arguments
+# GLOBAL
   ARG APP_UID=1000 \
-      APP_GID=1000
+      APP_GID=1000 \
+      APP_VERSION=
 
-  # foreign image layers
-  FROM 11notes/util AS util
-  FROM 11notes/distroless:lego AS distroless-lego
+# :: FOREIGN IMAGES
+  FROM 11notes/distroless AS distroless
+  FROM 11notes/distroless:lego${APP_VERSION} AS distroless-lego
 
 # ╔═════════════════════════════════════════════════════╗
 # ║                       BUILD                         ║
 # ╚═════════════════════════════════════════════════════╝
+# :: ENTRYPOINT
+  FROM 11notes/go:1.25 AS entrypoint
+  COPY ./build /
+  RUN set -ex; \
+    cd /go/entrypoint; \
+    eleven go build /entrypoint main.go; \
+    eleven distroless /entrypoint;
 
-  # build distroless lego-cron
-  FROM golang:1.24-alpine AS build
-
+# :: FILE SYSTEM
+  FROM alpine AS file-system
   ARG APP_ROOT
-
-  ENV BUILD_ROOT=/go/lego-cron \
-      BUILD_BIN=/go/lego-cron/lego-cron \
-      CGO_ENABLED=0
-
-  COPY --from=util /usr/local/bin/ /usr/local/bin
-  COPY ./go/lego-cron /go/lego-cron
-
-  USER root
-
-  RUN set -ex; \
-    apk --update --no-cache add \
-      build-base \
-      upx;
-
-  RUN set -ex; \
-    cd ${BUILD_ROOT}; \
-    go mod tidy;
-
-  RUN set -ex; \
-    cd ${BUILD_ROOT}; \
-    go build -ldflags="-extldflags=-static" -o ${BUILD_BIN} main.go;
-
-  RUN set -ex; \
-    eleven checkStatic ${BUILD_BIN}; \
-    eleven strip ${BUILD_BIN}; \
-    mkdir -p /distroless/usr/local/bin; \
-    cp ${BUILD_BIN} /distroless/usr/local/bin;
 
   RUN set -ex; \
     mkdir -p /distroless${APP_ROOT}/etc; \
@@ -54,22 +32,41 @@
 # ╔═════════════════════════════════════════════════════╗
 # ║                       IMAGE                         ║
 # ╚═════════════════════════════════════════════════════╝
+# :: HEADER
+  FROM scratch
 
-  # :: HEADER
-    FROM scratch
-
-    ARG APP_ROOT \
+  # :: default arguments
+    ARG TARGETPLATFORM \
+        TARGETOS \
+        TARGETARCH \
+        TARGETVARIANT \
+        APP_IMAGE \
+        APP_NAME \
+        APP_VERSION \
+        APP_ROOT \
         APP_UID \
-        APP_GID
+        APP_GID \
+        APP_NO_CACHE
 
-    ENV APP_ROOT=${APP_ROOT}
+  # :: default environment
+    ENV APP_IMAGE=${APP_IMAGE} \
+        APP_NAME=${APP_NAME} \
+        APP_VERSION=${APP_VERSION} \
+        APP_ROOT=${APP_ROOT}
 
-    COPY --from=distroless-lego --chown=${APP_UID}:${APP_GID} / /
-    COPY --from=build --chown=${APP_UID}:${APP_GID} /distroless/ /
+  # :: multi-stage
+    COPY --from=distroless / /
+    COPY --from=distroless-lego / /
+    COPY --from=entrypoint /distroless/ /
+    COPY --from=file-system --chown=${APP_UID}:${APP_GID} /distroless/ /
 
-  # :: PERSISTENT DATA
-    VOLUME ["${APP_ROOT}/etc", "${APP_ROOT}/var"]
+# :: PERSISTENT DATA
+  VOLUME ["${APP_ROOT}/etc", "${APP_ROOT}/var"]
 
-  # :: START
-    USER ${APP_UID}:${APP_GID}
-    ENTRYPOINT ["/usr/local/bin/lego-cron"]
+# :: MONITORING
+  HEALTHCHECK --interval=5s --timeout=2s --start-period=5s \
+    CMD ["/usr/local/bin/nc", "-z", "127.0.0.1", "22"]
+
+# :: EXECUTE
+  USER ${APP_UID}:${APP_GID}
+  ENTRYPOINT ["/usr/local/bin/entrypoint"]
