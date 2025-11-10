@@ -7,8 +7,9 @@
   },
   "readme": {
     "description": "Run lego on a schedule rootless, distroless and secure by default!",
+    "introduction": "Let's Encrypt client and ACME library written in Go.",
     "built": {
-      "lego": "https://github.com/11notes/docker-lego"
+      "go-acme/lego": "https://github.com/go-acme/lego"
     },
     "distroless": {
       "layers": [

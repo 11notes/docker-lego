@@ -1,4 +1,4 @@
-${{ content_synopsis }} Run [11notes/distroless:lego](https://github.com/11notes/docker-distroless/blob/master/lego.dockerfile) on a schedule to automatically renew all your certificates from a single yml config. 
+${{ content_synopsis }} Run [11notes/distroless:lego](https://github.com/11notes/docker-distroless/blob/master/lego.dockerfile) [rootless](https://github.com/11notes/RTFM/blob/main/linux/container/image/rootless.md) and [distroless](https://github.com/11notes/RTFM/blob/main/linux/container/image/distroless.md) on a schedule to automatically renew all your certificates from a single yml config.
 
 ${{ title_volumes }}
 * **${{ json_root }}/etc** - Directory of your Let's Encrypt accounts
