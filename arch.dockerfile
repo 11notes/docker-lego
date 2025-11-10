@@ -8,7 +8,7 @@
 
 # :: FOREIGN IMAGES
   FROM 11notes/distroless AS distroless
-  FROM 11notes/distroless:lego${APP_VERSION} AS distroless-lego
+  FROM 11notes/distroless:lego-${APP_VERSION} AS distroless-lego
 
 # ╔═════════════════════════════════════════════════════╗
 # ║                       BUILD                         ║
