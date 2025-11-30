@@ -1,7 +1,7 @@
 name: "letsencrypt"
 services:
   lego:
-    image: "11notes/lego:4.28.1"
+    image: "11notes/lego:4.29.0"
     dns:
       - "8.8.8.8"
       - "9.9.9.9"
