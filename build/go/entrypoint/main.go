@@ -19,11 +19,10 @@ import (
 	"encoding/pem"
 	"time"
 
-	"github.com/11notes/go"
+	"github.com/11notes/go-eleven"
 )
 
 var(
-	Eleven eleven.New = eleven.New{}
 	etc = Etc{
 		Paths:Paths{
 			Base:os.Getenv("APP_ROOT"),
@@ -107,22 +106,22 @@ func path(name string) (error){
 func accountValid(name string, file string) (bool){
 	accountJson, err := os.Open(file)
 	if err != nil{
-		Eleven.Log("ERR", "lego account error for %s: %s", name, err)
+		eleven.Log("ERR", "lego account error for %s: %s", name, err)
 		return false
 	}
 	byteValue, err := ioutil.ReadAll(accountJson)
 	if err != nil{
-		Eleven.Log("ERR", "lego account error for %s: %s", name, err)
+		eleven.Log("ERR", "lego account error for %s: %s", name, err)
 		return false
 	}
 	var account ACMEAccount
 	err = json.Unmarshal(byteValue, &account);
 	if err != nil{
-		Eleven.Log("ERR", "lego account error for %s: %s", name, err)
+		eleven.Log("ERR", "lego account error for %s: %s", name, err)
 		return false
 	}
 	if account.Registration.Body.Status != "valid"{
-		Eleven.Log("ERR", "lego account error for %s: Account status is not valid, it is %s", name, account.Registration.Body.Status)
+		eleven.Log("ERR", "lego account error for %s: Account status is not valid, it is %s", name, account.Registration.Body.Status)
 		return false
 	}
 	return true
@@ -149,16 +148,16 @@ func run(name string, fqdns []string, commands []string, environment []string) (
 	accountFile := fmt.Sprintf("%s/acme-v02.api.letsencrypt.org/%s/account.json", etc.Paths.BaseEtc, etc.Email)
 	if _, err := os.Stat(accountFile); os.IsNotExist(err){
 		args = append(args, "run")
-		Eleven.Log("INF", "create certificate for %s", name)
+		eleven.Log("INF", "create certificate for %s", name)
 	}else{
 		if accountValid(name, accountFile) {
 			// check if a certificate already exists
 			if _, err := os.Stat(fmt.Sprintf("%s/%s/certificates/%s.crt", etc.Paths.BaseVar, name, strings.Replace(fqdns[0], "*", "_", -1))); os.IsNotExist(err) {
 				args = append(args, "run")
-				Eleven.Log("INF", "create certificate for %s", name)
+				eleven.Log("INF", "create certificate for %s", name)
 			}else{
 				args = append(args, "renew")
-				Eleven.Log("INF", "renew certificate for %s", name)
+				eleven.Log("INF", "renew certificate for %s", name)
 			}
 		}else{
 			return false
@@ -179,23 +178,23 @@ func run(name string, fqdns []string, commands []string, environment []string) (
 		for stdoutScanner.Scan() {
 			line := stdoutScanner.Text()
 			output = append(output, line)
-			Eleven.Log("INF", "%s: %s", name, line)
+			eleven.Log("INF", "%s: %s", name, line)
 		}
 	}()
 
 	err = cmd.Start()
 	if err != nil {
-		Eleven.Log("INF", "lego execution error: %s", err)
+		eleven.Log("INF", "lego execution error: %s", err)
 		return false
 	}
 
 	err = cmd.Wait()
 	if err != nil {
-		Eleven.Log("INF", "lego execution error: %s", err)
+		eleven.Log("INF", "lego execution error: %s", err)
 		return false
 	}
 
-	Eleven.Log("INF", "certificate for %s successfully created", name)
+	eleven.Log("INF", "certificate for %s successfully created", name)
 
 	return true
 }
@@ -217,19 +216,19 @@ func cleanup(){
 		return nil
 	})
 	if err != nil {
-		Eleven.Log("ERR", "filepath.Walk error: %s", err)
+		eleven.Log("ERR", "filepath.Walk error: %s", err)
 	}
 }
 
 func checkCertificateExpired(crt string) (bool){
 	file, err := ioutil.ReadFile(crt)
 	if err != nil {
-		Eleven.Log("ERR", "could not open certificate %s: %s", crt, err)
+		eleven.Log("ERR", "could not open certificate %s: %s", crt, err)
 	}
 	b, _ := pem.Decode(file)
 	certificates, err := x509.ParseCertificates(b.Bytes)
 	if err != nil {
-		Eleven.Log("ERR", "could not parse certificate %s: %s", crt, err)
+		eleven.Log("ERR", "could not parse certificate %s: %s", crt, err)
 	}
 	for _, certificate := range certificates {
 		if time.Now().Unix() > certificate.NotAfter.Unix(){
@@ -240,14 +239,14 @@ func checkCertificateExpired(crt string) (bool){
 }
 
 func daily(){
-	Eleven.Log("INF", "starting daily job")
+	eleven.Log("INF", "starting daily job")
 
 	// check if config is valid
 	cfg, err := config()
 	if err != nil{
-		Eleven.Log("ERR", "config error: %s", err)
+		eleven.Log("ERR", "config error: %s", err)
 	}else{
-		Eleven.Log("INF", "found %b entires in config file", len(cfg.Domains))
+		eleven.Log("INF", "found %b entires in config file", len(cfg.Domains))
 		for _, certificate := range cfg.Domains {
 			// create env for lego to use
 			var env []string
@@ -289,11 +288,11 @@ func main(){
 	daily()
 	scheduler, err := gocron.NewScheduler()
 	if err != nil {
-		Eleven.LogFatal("cron error: %s", err)
+		eleven.LogFatal("cron error: %s", err)
 	}
 	_, err = scheduler.NewJob(gocron.CronJob("0 9 * * *", false), gocron.NewTask(daily))
 	if err != nil {
-		Eleven.LogFatal("cron error: %s", err)
+		eleven.LogFatal("cron error: %s", err)
 	}
 	scheduler.Start()
 	select {}
