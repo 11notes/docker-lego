@@ -133,7 +133,7 @@ func run(name string, fqdns []string, commands []string, environment []string) (
 	if err != nil{
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 	}
-	
+
 	// setup arguments for lego
 	var args = []string{"--accept-tos", "--path", fmt.Sprintf("%s/%s", etc.Paths.BaseVar, name), "--pfx", "--pfx.pass", "lego1234", "--pem"}
 	for _, command := range commands {
@@ -194,8 +194,6 @@ func run(name string, fqdns []string, commands []string, environment []string) (
 		return false
 	}
 
-	eleven.Log("INF", "certificate for %s successfully created", name)
-
 	return true
 }
 
@@ -246,7 +244,6 @@ func daily(){
 	if err != nil{
 		eleven.Log("ERR", "config error: %s", err)
 	}else{
-		eleven.Log("INF", "found %b entires in config file", len(cfg.Domains))
 		for _, certificate := range cfg.Domains {
 			// create env for lego to use
 			var env []string
@@ -277,8 +274,6 @@ func main(){
 	// syscalls
 	signalChannel := make(chan os.Signal, 1)
 	signal.Notify(signalChannel, syscall.SIGTERM, syscall.SIGSTOP, syscall.SIGINT)
-
-	// event listener
 	go func() {
 		<- signalChannel
 		os.Exit(0)
