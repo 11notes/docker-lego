@@ -22,6 +22,7 @@
     eleven go build /entrypoint main.go; \
     eleven distroless /entrypoint;
 
+
 # :: FILE SYSTEM
   FROM alpine AS file-system
   ARG APP_ROOT
