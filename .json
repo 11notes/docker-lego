@@ -6,7 +6,7 @@
     "version": "4.33.0"
   },
   "readme": {
-    "description": "Run lego on a schedule rootless, distroless and secure by default!",
+    "description": "run LEGO on a schedule, rootless and distroless.",
     "introduction": "Let's Encrypt client and ACME library written in Go.",
     "built": {
       "go-acme/lego": "https://github.com/go-acme/lego"
