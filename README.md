@@ -21,7 +21,7 @@ Let's Encrypt client and ACME library written in Go.
 name: "letsencrypt"
 services:
   lego:
-    image: "11notes/lego:4.34.0"
+    image: "11notes/lego:4.35.1"
     dns:
       - "8.8.8.8"
       - "9.9.9.9"
@@ -87,20 +87,20 @@ To find out how you can change the default UID/GID of this container image, cons
 # MAIN TAGS 🏷️
 These are the main tags for the image. There is also a tag for each commit and its shorthand sha256 value.
 
-* [4.34.0](https://hub.docker.com/r/11notes/lego/tags?name=4.34.0)
-* [4.34.0-unraid](https://hub.docker.com/r/11notes/lego/tags?name=4.34.0-unraid)
-* [4.34.0-nobody](https://hub.docker.com/r/11notes/lego/tags?name=4.34.0-nobody)
+* [4.35.1](https://hub.docker.com/r/11notes/lego/tags?name=4.35.1)
+* [4.35.1-unraid](https://hub.docker.com/r/11notes/lego/tags?name=4.35.1-unraid)
+* [4.35.1-nobody](https://hub.docker.com/r/11notes/lego/tags?name=4.35.1-nobody)
 
 ### There is no latest tag, what am I supposed to do about updates?
-It is my opinion that the ```:latest``` tag is a bad habbit and should not be used at all. Many developers introduce **breaking changes** in new releases. This would messed up everything for people who use ```:latest```. If you don’t want to change the tag to the latest [semver](https://semver.org/), simply use the short versions of [semver](https://semver.org/). Instead of using ```:4.34.0``` you can use ```:4``` or ```:4.34```. Since on each new version these tags are updated to the latest version of the software, using them is identical to using ```:latest``` but at least fixed to a major or minor version. Which in theory should not introduce breaking changes.
+It is my opinion that the ```:latest``` tag is a bad habbit and should not be used at all. Many developers introduce **breaking changes** in new releases. This would messed up everything for people who use ```:latest```. If you don’t want to change the tag to the latest [semver](https://semver.org/), simply use the short versions of [semver](https://semver.org/). Instead of using ```:4.35.1``` you can use ```:4``` or ```:4.35```. Since on each new version these tags are updated to the latest version of the software, using them is identical to using ```:latest``` but at least fixed to a major or minor version. Which in theory should not introduce breaking changes.
 
 If you still insist on having the bleeding edge release of this app, simply use the ```:rolling``` tag, but be warned! You will get the latest version of the app instantly, regardless of breaking changes or security issues or what so ever. You do this at your own risk!
 
 # REGISTRIES ☁️
 ```
-docker pull 11notes/lego:4.34.0
-docker pull ghcr.io/11notes/lego:4.34.0
-docker pull quay.io/11notes/lego:4.34.0
+docker pull 11notes/lego:4.35.1
+docker pull ghcr.io/11notes/lego:4.35.1
+docker pull quay.io/11notes/lego:4.35.1
 ```
 
 # UNRAID VERSION 🟠
@@ -130,4 +130,4 @@ This image supports nobody by default. Simply add **-nobody** to any tag and the
 # ElevenNotes™️
 This image is provided to you at your own risk. Always make backups before updating an image to a different version. Check the [releases](https://github.com/11notes/docker-lego/releases) for breaking changes. If you have any problems with using this image simply raise an [issue](https://github.com/11notes/docker-lego/issues), thanks. If you have a question or inputs please create a new [discussion](https://github.com/11notes/docker-lego/discussions) instead of an issue. You can find all my other repositories on [github](https://github.com/11notes?tab=repositories).
 
-*created 16.04.2026, 09:00:20 (CET)*
+*created 22.04.2026, 09:01:55 (CET)*
