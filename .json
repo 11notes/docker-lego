@@ -3,7 +3,7 @@
   "name": "lego",
   "root": "/lego",
   "semver": {
-    "version": "4.35.1"
+    "version": "4.35.2"
   },
   "readme": {
     "description": "run LEGO on a schedule, rootless and distroless.",
