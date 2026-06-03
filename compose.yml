@@ -10,7 +10,14 @@ x-lockdown: &lockdown
 services:
   lego:
     image: "11notes/lego:5.2.2"
+<<<<<<< HEAD
     <<: *lockdown
+=======
+    dns:
+      - "8.8.8.8"
+      - "9.9.9.9"
+    read_only: true
+>>>>>>> d7176203e15f83990951db0663b8986b8774f077
     environment:
       TZ: "Europe/Zurich"
       LEGO_CONFIG: |-
