@@ -16,7 +16,7 @@
 # ╚═════════════════════════════════════════════════════╝
 # :: ENTRYPOINT
   FROM 11notes/go:${APP_GO_VERSION} AS entrypoint
-  COPY ./build /
+  COPY ./build/go/entrypoint /go/entrypoint
   RUN set -ex; \
     cd /go/entrypoint; \
     eleven go build /entrypoint main.go; \
@@ -30,6 +30,7 @@
   RUN set -ex; \
     mkdir -p /distroless${APP_ROOT}/etc; \
     mkdir -p /distroless${APP_ROOT}/var;
+
 
 # ╔═════════════════════════════════════════════════════╗
 # ║                       IMAGE                         ║
@@ -61,13 +62,10 @@
     COPY --from=distroless-lego / /
     COPY --from=entrypoint /distroless/ /
     COPY --from=file-system --chown=${APP_UID}:${APP_GID} /distroless/ /
+    COPY --chown=${APP_UID}:${APP_GID} ./rootfs/ /
 
 # :: PERSISTENT DATA
   VOLUME ["${APP_ROOT}/etc", "${APP_ROOT}/var"]
-
-# :: MONITORING
-  HEALTHCHECK --interval=5s --timeout=2s --start-period=5s \
-    CMD ["/usr/local/bin/nc", "-z", "127.0.0.1", "22"]
 
 # :: EXECUTE
   USER ${APP_UID}:${APP_GID}

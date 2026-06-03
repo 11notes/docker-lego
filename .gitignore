@@ -2,3 +2,7 @@
 maintain/
 node_modules/
 .env
+
+# custom
+cloudflare.txt
+rfc2136.txt
