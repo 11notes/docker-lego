@@ -1,7 +1,7 @@
 ![banner](https://raw.githubusercontent.com/11notes/static/refs/heads/master/img/banner/README.png)
 
 # LEGO
-![size](https://img.shields.io/badge/image_size-7MB-green?color=%2338ad2d)![5px](https://raw.githubusercontent.com/11notes/static/refs/heads/master/img/markdown/transparent5x2px.png)![pulls](https://img.shields.io/docker/pulls/11notes/lego?color=2b75d6)![5px](https://raw.githubusercontent.com/11notes/static/refs/heads/master/img/markdown/transparent5x2px.png)[<img src="https://img.shields.io/github/issues/11notes/docker-lego?color=7842f5">](https://github.com/11notes/docker-lego/issues)![5px](https://raw.githubusercontent.com/11notes/static/refs/heads/master/img/markdown/transparent5x2px.png)![swiss_made](https://img.shields.io/badge/Swiss_Made-FFFFFF?labelColor=FF0000&logo=data:image/svg%2bxml;base64,PHN2ZyB2ZXJzaW9uPSIxIiB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDMyIDMyIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogIDxyZWN0IHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgZmlsbD0idHJhbnNwYXJlbnQiLz4KICA8cGF0aCBkPSJtMTMgNmg2djdoN3Y2aC03djdoLTZ2LTdoLTd2LTZoN3oiIGZpbGw9IiNmZmYiLz4KPC9zdmc+)
+![size](https://img.shields.io/badge/image_size-37MB-green?color=%2338ad2d)![5px](https://raw.githubusercontent.com/11notes/static/refs/heads/master/img/markdown/transparent5x2px.png)![pulls](https://img.shields.io/docker/pulls/11notes/lego?color=2b75d6)![5px](https://raw.githubusercontent.com/11notes/static/refs/heads/master/img/markdown/transparent5x2px.png)[<img src="https://img.shields.io/github/issues/11notes/docker-lego?color=7842f5">](https://github.com/11notes/docker-lego/issues)![5px](https://raw.githubusercontent.com/11notes/static/refs/heads/master/img/markdown/transparent5x2px.png)![swiss_made](https://img.shields.io/badge/Swiss_Made-FFFFFF?labelColor=FF0000&logo=data:image/svg%2bxml;base64,PHN2ZyB2ZXJzaW9uPSIxIiB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDMyIDMyIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogIDxyZWN0IHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgZmlsbD0idHJhbnNwYXJlbnQiLz4KICA8cGF0aCBkPSJtMTMgNmg2djdoN3Y2aC03djdoLTZ2LTdoLTd2LTZoN3oiIGZpbGw9IiNmZmYiLz4KPC9zdmc+)
 
 run LEGO on a schedule, rootless and distroless.
 
@@ -9,53 +9,87 @@ run LEGO on a schedule, rootless and distroless.
 
 Let's Encrypt client and ACME library written in Go.
 
+# CAUTION ⚠️
+> [!CAUTION]
+>v5 of LEGO will use the new yml config and will not work with your existing pre v5 config, please convert your exisiting config into the new format. The format can be found [here](https://github.com/go-acme/lego/blob/main/cmd/internal/configuration/testdata/reference.yml).
+
 # SYNOPSIS 📖
-**What can I do with this?** Run [11notes/distroless:lego](https://github.com/11notes/docker-distroless/blob/master/lego.dockerfile) [rootless](https://github.com/11notes/RTFM/blob/main/linux/container/image/rootless.md) and [distroless](https://github.com/11notes/RTFM/blob/main/linux/container/image/distroless.md) on a schedule to automatically renew all your certificates from a single yml config.
+**What can I do with this?** This image will give you a [rootless](https://github.com/11notes/RTFM/blob/main/linux/container/image/rootless.md) and [distroless](https://github.com/11notes/RTFM/blob/main/linux/container/image/distroless.md) LEGO installation to automate your cert creation.
+
+# UNIQUE VALUE PROPOSITION 💶
+**Why should I run this image and not the other image(s) that already exist?** Good question! Because ...
+
+> [!IMPORTANT]
+>* ... this image runs [rootless](https://github.com/11notes/RTFM/blob/main/linux/container/image/rootless.md) as 1000:1000
+>* ... this image has no shell since it is [distroless](https://github.com/11notes/RTFM/blob/main/linux/container/image/distroless.md)
+>* ... this image is auto updated to the latest version via CI/CD
+>* ... this image has a health check
+>* ... this image runs read-only
+>* ... this image is automatically scanned for CVEs before and after publishing
+>* ... this image is created via a secure and pinned CI/CD process
+>* ... this image is very small
+>* ... this image support [inline configs](https://github.com/11notes/RTFM/blob/master/linux/container/image/11notes/inline-config.md)
+
+If you value security, simplicity and optimizations to the extreme, then this image might be for you.
 
 # VOLUMES 📁
-* **/lego/etc** - Directory of your Let's Encrypt accounts
-* **/lego/var** - Directory of your Let's Encrypt certificates
+* **/lego/etc** - Directory of your Let's Encrypt config
+* **/lego/var** - Directory of your Let's Encrypt certificates and accounts
 
 # COMPOSE ✂️
 ```yaml
 name: "letsencrypt"
+
+x-lockdown: &lockdown
+  # prevents write access to the image itself
+  read_only: true
+  # prevents any process within the container to gain more privileges
+  security_opt:
+    - "no-new-privileges=true"
+
 services:
   lego:
     image: "11notes/lego:5.2.2"
-    dns:
-      - "8.8.8.8"
-      - "9.9.9.9"
-    read_only: true
+    <<: *lockdown
     environment:
       TZ: "Europe/Zurich"
       LEGO_CONFIG: |-
-        domains:
-          - name: "domain.com"
-            fqdns:
-              - "*.domain.com"
-              - "domain.com"
-            commands:
-              - "--dns"
-              - "rfc2136"
-
-          - name: "porkbun.com"
-            fqdns:
-              - "*.porkbun.com"
-              - "porkbun.com"
-            commands:
-              - "--dns"
-              - "porkbun"
-        global:
-          LEGO_EMAIL: "info@domain.com"
-          RFC2136_NAMESERVER: "ns.domain.com"
-          RFC2136_TSIG_ALGORITHM: "hmac-sha512"
-          RFC2136_TSIG_KEY: "lego"
-          RFC2136_TSIG_SECRET: ${RFC2136_TSIG_SECRET}
-          PORKBUN_SECRET_API_KEY: ${PORKBUN_SECRET_API_KEY}
-          PORKBUN_API_KEY: ${PORKBUN_API_KEY}
+        storage: /lego/var
+        accounts:
+          default:
+            acceptsTermsOfService: true
+        challenges:
+          cf:
+            dns:
+              provider: cloudflare
+              envFile: /run/secrets/cf
+              resolvers:
+                - 8.8.8.8:53
+                - 1.1.1.1:53
+                - 9.9.9.9:53
+        certificates:
+          github:
+            challenge: cf
+            domains:
+              - "github.com"
+              - "*.github.com"
+            renew:
+              reuseKey: false
+              days: 30
+            pfx:
+              password: lego1234
+              format: SHA256
+        log:
+          level: info
+          format: text
     volumes:
-      - "lego.etc:/lego/etc" 
+      - "lego.etc:/lego/etc"
       - "lego.var:/lego/var"
+    tmpfs:
+      # needed for read-only
+      - "/run/secrets:uid=1000,gid=1000"
+    secrets:
+      - "cf"
     networks:
       frontend:
     restart: "always"
@@ -66,6 +100,10 @@ volumes:
 
 networks:
   frontend:
+
+secrets:
+  cf:
+    file: "./cloudflare.txt"
 ```
 To find out how you can change the default UID/GID of this container image, consult the [RTFM](https://github.com/11notes/RTFM/blob/main/linux/container/image/11notes/how-to.changeUIDGID.md#change-uidgid-the-correct-way).
 
@@ -82,7 +120,7 @@ To find out how you can change the default UID/GID of this container image, cons
 | --- | --- | --- |
 | `TZ` | [Time Zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) | |
 | `DEBUG` | Will activate debug option for container image and app (if available) | |
-| `LEGO_CONFIG` | Your config for all your domains, either as a file or inline | |
+| `LEGO_CONFIG` | Will overwrite the default config with the value of this variable if set ([inline config](https://github.com/11notes/RTFM/blob/master/linux/container/image/11notes/inline-config.md)) | |
 
 # MAIN TAGS 🏷️
 These are the main tags for the image. There is also a tag for each commit and its shorthand sha256 value.
@@ -130,4 +168,4 @@ This image supports nobody by default. Simply add **-nobody** to any tag and the
 # ElevenNotes™️
 This image is provided to you at your own risk. Always make backups before updating an image to a different version. Check the [releases](https://github.com/11notes/docker-lego/releases) for breaking changes. If you have any problems with using this image simply raise an [issue](https://github.com/11notes/docker-lego/issues), thanks. If you have a question or inputs please create a new [discussion](https://github.com/11notes/docker-lego/discussions) instead of an issue. You can find all my other repositories on [github](https://github.com/11notes?tab=repositories).
 
-*created 03.06.2026, 12:05:16 (CET)*
+*created 04.06.2026, 01:56:20 (CET)*
