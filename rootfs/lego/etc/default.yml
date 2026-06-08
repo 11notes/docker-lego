@@ -1,9 +1,3 @@
-storage: /lego/var
-
-accounts:
-  default:
-    acceptsTermsOfService: true
-
 challenges:
   cf:
     dns:
@@ -13,6 +7,10 @@ challenges:
         - 1.1.1.1:53
         - 9.9.9.9:53
 
+storage: /lego/var
+accounts:
+  default:
+    acceptsTermsOfService: true
 log:
   level: info
   format: text
