@@ -13,6 +13,29 @@ services:
     <<: *lockdown
     environment:
       TZ: "Europe/Zurich"
+      LEGO_CONFIG: |-
+        challenges:
+          cf:
+            dns:
+              provider: cloudflare
+              resolvers:
+                - 8.8.8.8:53
+                - 1.1.1.1:53
+                - 9.9.9.9:53
+
+        certificates:
+          github:
+            challenge: cf
+            domains:
+              - "github.com"
+
+        storage: /lego/var
+        accounts:
+          default:
+            acceptsTermsOfService: true
+        log:
+          level: info
+          format: text
     volumes:
       - "lego.etc:/lego/etc"
       - "lego.var:/lego/var"
