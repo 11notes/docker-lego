@@ -23,6 +23,15 @@
     eleven distroless /entrypoint;
 
 
+# :: HEALTHCHECK
+  FROM 11notes/go:${APP_GO_VERSION} AS healthcheck
+  COPY ./build/go/healthcheck /go/healthcheck
+  RUN set -ex; \
+    cd /go/healthcheck; \
+    eleven go build /healthcheck main.go; \
+    eleven distroless nostrip /healthcheck;
+
+
 # :: FILE SYSTEM
   FROM alpine AS file-system
   ARG APP_ROOT
@@ -61,11 +70,16 @@
     COPY --from=distroless / /
     COPY --from=distroless-lego / /
     COPY --from=entrypoint /distroless/ /
+    COPY --from=healthcheck /distroless/ /
     COPY --from=file-system --chown=${APP_UID}:${APP_GID} /distroless/ /
     COPY --chown=${APP_UID}:${APP_GID} ./rootfs/ /
 
 # :: PERSISTENT DATA
   VOLUME ["${APP_ROOT}/etc", "${APP_ROOT}/var"]
+
+# :: HEALTH
+  HEALTHCHECK --interval=5s --timeout=2s --start-period=5s \
+    CMD ["/usr/local/bin/healthcheck"]
 
 # :: EXECUTE
   USER ${APP_UID}:${APP_GID}
