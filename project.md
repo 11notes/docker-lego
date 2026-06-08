@@ -30,6 +30,7 @@ ${{ content_defaults }}
 
 ${{ content_environment }}
 | `LEGO_CONFIG` | Will overwrite the default config with the value of this variable if set ([inline config](https://github.com/11notes/RTFM/blob/master/linux/container/image/11notes/inline-config.md)) | |
+| `TRAEFIK_ROOT` | If this env is defined all the certificates will be symbolic linked to ```/lego/var/traefik``` and a ```lego.yml``` config will be generated for Traefik containing the base path defined in this variable. You can then simply copy the contents of this folder to your dynamic Traefik config. | |
 
 ${{ content_source }}
 
