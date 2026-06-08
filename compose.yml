@@ -14,10 +14,6 @@ services:
     environment:
       TZ: "Europe/Zurich"
       LEGO_CONFIG: |-
-        storage: /lego/var
-        accounts:
-          default:
-            acceptsTermsOfService: true
         challenges:
           cf:
             dns:
@@ -27,18 +23,23 @@ services:
                 - 8.8.8.8:53
                 - 1.1.1.1:53
                 - 9.9.9.9:53
+
         certificates:
-          github:
+          ${FQDN}:
             challenge: cf
             domains:
-              - "github.com"
-              - "*.github.com"
+              - "${FQDN}"
+              - "*.${FQDN}"
             renew:
               reuseKey: false
-              days: 30
             pfx:
               password: lego1234
               format: SHA256
+
+        storage: /lego/var
+        accounts:
+          default:
+            acceptsTermsOfService: true
         log:
           level: info
           format: text
