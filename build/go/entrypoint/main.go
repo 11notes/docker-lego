@@ -8,6 +8,7 @@ import (
 	"io"
 	"bufio"
 	"regexp"
+	"strings"
 
 	"github.com/go-co-op/gocron/v2"
   "github.com/11notes/go-eleven"
@@ -18,7 +19,7 @@ const APP_CONFIG_ENV = "LEGO_CONFIG"
 const APP_CONFIG string = "/lego/etc/default.yml"
 
 var (
-	extractLog = regexp.MustCompile(`\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+(?:Z|[-+]\d{2}:\d{2})\s+level=(\S+) msg=(.+)`)
+	extractLog = regexp.MustCompile(`\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+(?:Z|[-+]\d{2}:\d{2})\s+level=(\S+) msg="(.+)`)
 )
 
 func main(){
@@ -33,8 +34,10 @@ func main(){
 	// write env to file if set
 	eleven.Container.EnvToFile(APP_CONFIG_ENV, APP_CONFIG)
 
-	// set schedule
+	// run at init
 	daily()
+
+	// set schedule
 	scheduler, err := gocron.NewScheduler()
 	if err != nil {
 		eleven.LogFatal("cron error: %s", err)
@@ -60,7 +63,11 @@ func run(bin string, params []string){
 			line := stdoutScanner.Text()
 			if len(line) > 0 {
 				match := extractLog.FindStringSubmatch(line)
-				eleven.Log(match[1], match[2])
+				if len(match) >= 3 {
+					eleven.Log(match[1], sanitizeLog(match[2]))
+				}else{
+					eleven.Log("INF", line)
+				}
 			}
 		}
 	}()
@@ -76,7 +83,14 @@ func run(bin string, params []string){
 }
 
 func daily(){
-	eleven.Log("INF", "starting certificate renewal process ...")
+	eleven.Log("INF", "starting certificate creation/renewal process ...")
 	run(APP_BIN, []string{"--config", APP_CONFIG})
-	eleven.Log("INF", "certificate renewal process complete.")
+	eleven.Log("INF", "certificate creation/renewal process complete.")
+}
+
+func sanitizeLog(log string) string{
+	log = strings.ReplaceAll(log, `"`, ``)
+	log = strings.ReplaceAll(log, `\n\n`, ` `)
+	log = strings.ReplaceAll(log, `\n`, ` `)
+	return log
 }
