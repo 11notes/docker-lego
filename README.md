@@ -50,7 +50,7 @@ x-lockdown: &lockdown
 
 services:
   lego:
-    image: "11notes/lego:5.2.2"
+    image: "11notes/lego:5.3.1"
     <<: *lockdown
     environment:
       TZ: "Europe/Zurich"
@@ -123,24 +123,25 @@ To find out how you can change the default UID/GID of this container image, cons
 | `TZ` | [Time Zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) | |
 | `DEBUG` | Will activate debug option for container image and app (if available) | |
 | `LEGO_CONFIG` | Will overwrite the default config with the value of this variable if set ([inline config](https://github.com/11notes/RTFM/blob/master/linux/container/image/11notes/inline-config.md)) | |
+| `TRAEFIK_ROOT` | If this env is defined all the certificates will be symbolic linked to ```/lego/var/traefik``` and a ```lego.yml``` config will be generated for Traefik containing the base path defined in this variable. You can then simply copy the contents of this folder to your dynamic Traefik config. | |
 
 # MAIN TAGS 🏷️
 These are the main tags for the image. There is also a tag for each commit and its shorthand sha256 value.
 
-* [5.2.2](https://hub.docker.com/r/11notes/lego/tags?name=5.2.2)
-* [5.2.2-unraid](https://hub.docker.com/r/11notes/lego/tags?name=5.2.2-unraid)
-* [5.2.2-nobody](https://hub.docker.com/r/11notes/lego/tags?name=5.2.2-nobody)
+* [5.3.1](https://hub.docker.com/r/11notes/lego/tags?name=5.3.1)
+* [5.3.1-unraid](https://hub.docker.com/r/11notes/lego/tags?name=5.3.1-unraid)
+* [5.3.1-nobody](https://hub.docker.com/r/11notes/lego/tags?name=5.3.1-nobody)
 
 ### There is no latest tag, what am I supposed to do about updates?
-It is my opinion that the ```:latest``` tag is a bad habbit and should not be used at all. Many developers introduce **breaking changes** in new releases. This would messed up everything for people who use ```:latest```. If you don’t want to change the tag to the latest [semver](https://semver.org/), simply use the short versions of [semver](https://semver.org/). Instead of using ```:5.2.2``` you can use ```:5``` or ```:5.2```. Since on each new version these tags are updated to the latest version of the software, using them is identical to using ```:latest``` but at least fixed to a major or minor version. Which in theory should not introduce breaking changes.
+It is my opinion that the ```:latest``` tag is a bad habbit and should not be used at all. Many developers introduce **breaking changes** in new releases. This would messed up everything for people who use ```:latest```. If you don’t want to change the tag to the latest [semver](https://semver.org/), simply use the short versions of [semver](https://semver.org/). Instead of using ```:5.3.1``` you can use ```:5``` or ```:5.3```. Since on each new version these tags are updated to the latest version of the software, using them is identical to using ```:latest``` but at least fixed to a major or minor version. Which in theory should not introduce breaking changes.
 
 If you still insist on having the bleeding edge release of this app, simply use the ```:rolling``` tag, but be warned! You will get the latest version of the app instantly, regardless of breaking changes or security issues or what so ever. You do this at your own risk!
 
 # REGISTRIES ☁️
 ```
-docker pull 11notes/lego:5.2.2
-docker pull ghcr.io/11notes/lego:5.2.2
-docker pull quay.io/11notes/lego:5.2.2
+docker pull 11notes/lego:5.3.1
+docker pull ghcr.io/11notes/lego:5.3.1
+docker pull quay.io/11notes/lego:5.3.1
 ```
 
 # UNRAID VERSION 🟠
@@ -170,4 +171,4 @@ This image supports nobody by default. Simply add **-nobody** to any tag and the
 # ElevenNotes™️
 This image is provided to you at your own risk. Always make backups before updating an image to a different version. Check the [releases](https://github.com/11notes/docker-lego/releases) for breaking changes. If you have any problems with using this image simply raise an [issue](https://github.com/11notes/docker-lego/issues), thanks. If you have a question or inputs please create a new [discussion](https://github.com/11notes/docker-lego/discussions) instead of an issue. You can find all my other repositories on [github](https://github.com/11notes?tab=repositories).
 
-*created 08.06.2026, 11:03:38 (CET)*
+*created 23.07.2026, 06:04:01 (CET)*
