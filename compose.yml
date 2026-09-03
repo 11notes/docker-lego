@@ -9,7 +9,7 @@ x-lockdown: &lockdown
 
 services:
   lego:
-    image: "11notes/lego:5.4.0"
+    image: "11notes/lego:5.4.1"
     <<: *lockdown
     environment:
       TZ: "Europe/Zurich"
