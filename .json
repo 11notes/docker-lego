@@ -17,5 +17,7 @@
         "11notes/distroless:lego"
       ]
     }
-  }
+  },
+  "unraid": true,
+  "nobody": true
 }
